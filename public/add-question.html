@@ -1,0 +1,128 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Quiz Questions</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f4f8;
+            margin: 0;
+        }
+
+        header {
+            background-color: #243b55;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 650px;
+            margin: 30px auto;
+            background-color: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        button {
+            background-color: #243b55;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+
+        button:hover {
+            background-color: #141e30;
+        }
+
+        #message {
+            margin-top: 15px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>Online Quiz System</h1>
+        <h2>Add Questions</h2>
+    </header>
+
+    <div class="container">
+
+        <h2>Question Details</h2>
+
+        <form id="addQuestionForm">
+
+            <label>Select Quiz</label>
+            <select id="quizId" required>
+                <option value="">Loading quizzes...</option>
+            </select>
+
+            <label>Question</label>
+            <input
+                type="text"
+                id="question"
+                placeholder="Enter your question"
+                required
+            >
+
+            <label>Option A</label>
+            <input type="text" id="optionA" placeholder="Option A" required>
+
+            <label>Option B</label>
+            <input type="text" id="optionB" placeholder="Option B" required>
+
+            <label>Option C</label>
+            <input type="text" id="optionC" placeholder="Option C" required>
+
+            <label>Option D</label>
+            <input type="text" id="optionD" placeholder="Option D" required>
+
+            <label>Correct Answer</label>
+            <select id="correctAnswer" required>
+                <option value="">Select correct answer</option>
+                <option value="A">Option A</option>
+                <option value="B">Option B</option>
+                <option value="C">Option C</option>
+                <option value="D">Option D</option>
+            </select>
+
+            <button type="submit">Save Question</button>
+
+        </form>
+
+        <div id="message"></div>
+
+        <button onclick="window.location.href='admin-dashboard.html'">
+            Back to Dashboard
+        </button>
+
+    </div>
+
+    <script src="js/add-question.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,315 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Quizzes</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f2f4f8;
+            margin: 0;
+            padding: 25px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+
+        input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 12px;
+            margin-top: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 15px;
+        }
+
+        .quiz-card {
+            border: 1px solid #ddd;
+            padding: 18px;
+            margin-top: 20px;
+            border-radius: 8px;
+        }
+
+        .quiz-card h3 {
+            color: #007bff;
+            margin-top: 0;
+        }
+
+        .question-card {
+            background: #f7f7f7;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 6px;
+        }
+
+        button {
+            padding: 9px 14px;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            margin: 5px 3px;
+        }
+
+        .delete {
+            background: #dc3545;
+        }
+
+        .delete:hover {
+            background: #b02a37;
+        }
+
+        .back {
+            background: #007bff;
+            margin-top: 20px;
+        }
+
+        .message {
+            text-align: center;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h2>Manage Quizzes and Questions</h2>
+
+    <input
+        type="text"
+        id="searchInput"
+        placeholder="Search quizzes by title..."
+        oninput="searchQuizzes()"
+    >
+
+    <p id="message" class="message">Loading quizzes...</p>
+
+    <div id="quizList"></div>
+
+    <button class="back"
+        onclick="window.location.href='admin-dashboard.html'">
+        Back to Dashboard
+    </button>
+
+</div>
+
+<script>
+    const adminId = localStorage.getItem("adminId");
+    let allQuizzes = [];
+
+    if (!adminId) {
+        window.location.href = "admin-login.html";
+    } else {
+        loadQuizzes();
+    }
+
+    async function loadQuizzes() {
+        const message = document.getElementById("message");
+
+        try {
+            const response = await fetch("/quizzes");
+            const data = await response.json();
+
+            if (!response.ok || !data.quizzes) {
+                throw new Error("Unable to load quizzes.");
+            }
+
+            allQuizzes = data.quizzes;
+            displayQuizzes(allQuizzes);
+
+        } catch (error) {
+            message.textContent = error.message;
+        }
+    }
+
+    async function displayQuizzes(quizzes) {
+        const quizList = document.getElementById("quizList");
+        const message = document.getElementById("message");
+
+        quizList.innerHTML = "";
+
+        if (quizzes.length === 0) {
+            message.textContent = "No matching quizzes found.";
+            return;
+        }
+
+        message.textContent = "Quizzes found: " + quizzes.length;
+
+        for (const quiz of quizzes) {
+            const card = document.createElement("div");
+            card.className = "quiz-card";
+
+            const heading = document.createElement("h3");
+            heading.textContent = quiz.title;
+
+            const description = document.createElement("p");
+            description.textContent = quiz.description || "";
+
+            const marks = document.createElement("p");
+            marks.textContent = "Total Marks: " + quiz.total_marks;
+
+            const deleteQuizButton = document.createElement("button");
+            deleteQuizButton.className = "delete";
+            deleteQuizButton.textContent = "Delete Quiz";
+            deleteQuizButton.onclick = () => deleteQuiz(quiz.id);
+
+            const questionHeading = document.createElement("h4");
+            questionHeading.textContent = "Questions";
+
+            const questionList = document.createElement("div");
+
+            card.append(
+                heading,
+                description,
+                marks,
+                deleteQuizButton,
+                questionHeading,
+                questionList
+            );
+
+            quizList.appendChild(card);
+
+            try {
+                const questionResponse = await fetch(
+                    `/quiz/${quiz.id}/questions`
+                );
+
+                const questionData = await questionResponse.json();
+
+                if (!questionResponse.ok || !questionData.questions) {
+                    throw new Error("Unable to load questions.");
+                }
+
+                if (questionData.questions.length === 0) {
+                    questionList.textContent = "No questions added yet.";
+                }
+
+                questionData.questions.forEach(question => {
+                    const questionCard = document.createElement("div");
+                    questionCard.className = "question-card";
+
+                    const questionText = document.createElement("p");
+                    questionText.textContent =
+                        question.question_text || question.question;
+
+                    const deleteQuestionButton = document.createElement("button");
+                    deleteQuestionButton.className = "delete";
+                    deleteQuestionButton.textContent = "Delete Question";
+
+                    deleteQuestionButton.onclick = () =>
+                        deleteQuestion(question.id);
+
+                    questionCard.append(
+                        questionText,
+                        deleteQuestionButton
+                    );
+
+                    questionList.appendChild(questionCard);
+                });
+
+            } catch (error) {
+                questionList.textContent = error.message;
+            }
+        }
+    }
+
+    function searchQuizzes() {
+        const searchText = document
+            .getElementById("searchInput")
+            .value
+            .trim()
+            .toLowerCase();
+
+        const filteredQuizzes = allQuizzes.filter(quiz =>
+            quiz.title.toLowerCase().includes(searchText)
+        );
+
+        displayQuizzes(filteredQuizzes);
+    }
+
+    async function deleteQuestion(questionId) {
+        if (!confirm("Are you sure you want to delete this question?")) {
+            return;
+        }
+
+        try {
+            const response = await fetch("/admin/delete-question", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    adminId,
+                    questionId
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                alert(data.message || "Unable to delete question.");
+                return;
+            }
+
+            alert(data.message);
+            loadQuizzes();
+
+        } catch (error) {
+            alert("Something went wrong while deleting the question.");
+        }
+    }
+
+    async function deleteQuiz(quizId) {
+        if (!confirm(
+            "Are you sure you want to delete this quiz and all its questions?"
+        )) {
+            return;
+        }
+
+        try {
+            const response = await fetch("/admin/delete-quiz", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    adminId,
+                    quizId
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                alert(data.message || "Unable to delete quiz.");
+                return;
+            }
+
+            alert(data.message);
+            loadQuizzes();
+
+        } catch (error) {
+            alert("Something went wrong while deleting the quiz.");
+        }
+    }
+</script>
+
+</body>
+</html>

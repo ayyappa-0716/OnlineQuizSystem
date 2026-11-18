@@ -1,0 +1,333 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Quiz Results</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f4f8;
+            margin: 0;
+            padding: 30px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: auto;
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+
+        input, select {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 12px;
+            margin-top: 12px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 15px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 25px;
+            min-width: 850px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 18px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+            margin-right: 10px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #exportBtn {
+            background-color: #198754;
+        }
+
+        #exportBtn:hover {
+            background-color: #146c43;
+        }
+
+        #message {
+            text-align: center;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h2>All Quiz Results</h2>
+
+    <input
+        type="text"
+        id="searchInput"
+        placeholder="Search by student name, email or quiz title..."
+        oninput="filterResults()"
+    >
+
+    <select id="quizFilter" onchange="filterResults()">
+        <option value="">All Quizzes</option>
+    </select>
+
+    <p id="message">Loading results...</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Student Name</th>
+                <th>Email</th>
+                <th>Quiz Title</th>
+                <th>Score</th>
+                <th>Total Marks</th>
+                <th>Percentage</th>
+                <th>Submitted At</th>
+            </tr>
+        </thead>
+
+        <tbody id="resultsTable"></tbody>
+    </table>
+
+    <button id="exportBtn" onclick="exportToExcel()">
+        Export to Excel
+    </button>
+
+    <button onclick="window.location.href='admin-dashboard.html'">
+        Back to Dashboard
+    </button>
+
+</div>
+
+<script>
+    const adminId = localStorage.getItem("adminId");
+
+    let allResults = [];
+    let displayedResults = [];
+
+    if (!adminId) {
+        window.location.href = "admin-login.html";
+    } else {
+        loadResults();
+    }
+
+    async function loadResults() {
+        const message = document.getElementById("message");
+
+        try {
+            const response = await fetch("/admin/all-results");
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(data.message || "Unable to load results.");
+            }
+
+            allResults = data.results;
+
+            populateQuizFilter();
+            displayResults(allResults);
+
+        } catch (error) {
+            message.textContent = error.message;
+        }
+    }
+
+    function populateQuizFilter() {
+        const quizFilter = document.getElementById("quizFilter");
+
+        const quizTitles = [
+            ...new Set(allResults.map(result => result.quiz_title))
+        ];
+
+        quizFilter.innerHTML = '<option value="">All Quizzes</option>';
+
+        quizTitles.forEach(title => {
+            const option = document.createElement("option");
+            option.value = title;
+            option.textContent = title;
+            quizFilter.appendChild(option);
+        });
+    }
+
+    function filterResults() {
+        const searchText = document
+            .getElementById("searchInput")
+            .value.trim().toLowerCase();
+
+        const selectedQuiz = document.getElementById("quizFilter").value;
+
+        const filteredResults = allResults.filter(result => {
+            const matchesSearch =
+                (result.student_name || "").toLowerCase().includes(searchText) ||
+                (result.student_email || "").toLowerCase().includes(searchText) ||
+                (result.quiz_title || "").toLowerCase().includes(searchText);
+
+            const matchesQuiz =
+                selectedQuiz === "" ||
+                result.quiz_title === selectedQuiz;
+
+            return matchesSearch && matchesQuiz;
+        });
+
+        displayResults(filteredResults);
+    }
+
+    function displayResults(results) {
+        const message = document.getElementById("message");
+        const table = document.getElementById("resultsTable");
+
+        table.innerHTML = "";
+
+        displayedResults = results;
+
+        if (results.length === 0) {
+            message.textContent = "No matching results found.";
+            return;
+        }
+
+        message.textContent = "Quiz attempts found: " + results.length;
+
+        results.forEach(result => {
+            const row = document.createElement("tr");
+
+            const percentage = result.total_marks > 0
+                ? ((result.score / result.total_marks) * 100).toFixed(2) + "%"
+                : "0.00%";
+
+            const values = [
+                result.student_name,
+                result.student_email,
+                result.quiz_title,
+                result.score,
+                result.total_marks,
+                percentage,
+                result.submitted_at
+                    ? new Date(result.submitted_at).toLocaleString()
+                    : "Not available"
+            ];
+
+            values.forEach(value => {
+                const cell = document.createElement("td");
+                cell.textContent = value ?? "";
+                row.appendChild(cell);
+            });
+
+            table.appendChild(row);
+        });
+    }
+
+    // Export currently displayed results
+    function exportToExcel() {
+
+        if (displayedResults.length === 0) {
+            alert("No results available to export.");
+            return;
+        }
+
+        const headers = [
+            "Student Name",
+            "Email",
+            "Quiz Title",
+            "Score",
+            "Total Marks",
+            "Percentage",
+            "Submitted At"
+        ];
+
+        const rows = displayedResults.map(result => {
+
+            const percentage = result.total_marks > 0
+                ? ((result.score / result.total_marks) * 100).toFixed(2) + "%"
+                : "0.00%";
+
+            return [
+                result.student_name,
+                result.student_email,
+                result.quiz_title,
+                result.score,
+                result.total_marks,
+                percentage,
+                result.submitted_at
+            ];
+        });
+
+        function escapeCSV(value) {
+            let text = String(value ?? "");
+
+            // Prevent spreadsheet formula injection
+            if (/^[\s]*[=+\-@\t\r]/.test(text)) {
+                text = "'" + text;
+            }
+
+            return '"' + text.replace(/"/g, '""') + '"';
+        }
+
+        const csvContent = [
+            headers,
+            ...rows
+        ].map(row =>
+            row.map(escapeCSV).join(",")
+        ).join("\r\n");
+
+        const blob = new Blob(
+            ["\uFEFF" + csvContent],
+            { type: "text/csv;charset=utf-8;" }
+        );
+
+        const url = URL.createObjectURL(blob);
+
+        const link = document.createElement("a");
+
+        link.href = url;
+        link.download = "Quiz_Report.csv";
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        URL.revokeObjectURL(url);
+
+        alert("Quiz report exported successfully!");
+    }
+
+</script>
+
+</body>
+</html>

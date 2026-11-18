@@ -1,0 +1,131 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attempt Quiz</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f4f8;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #243b55;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 750px;
+            width: 90%;
+            margin: 30px auto;
+        }
+
+        .quiz-card {
+            background-color: white;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .question {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .option {
+            display: block;
+            margin: 12px 0;
+            cursor: pointer;
+        }
+
+        button {
+            background-color: #243b55;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+
+        button:hover {
+            background-color: #141e30;
+        }
+
+        button:disabled {
+            background-color: #888;
+            cursor: not-allowed;
+        }
+
+        #result {
+            background-color: white;
+            padding: 25px;
+            margin-top: 20px;
+            border-radius: 10px;
+            text-align: center;
+            display: none;
+        }
+
+        .back-btn {
+            background-color: #555;
+        }
+
+        #timer {
+            font-size: 24px;
+            font-weight: bold;
+            color: #243b55;
+        }
+
+        #timer.danger {
+            color: red;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>Online Quiz System</h1>
+        <h2 id="quizTitle">Loading Quiz...</h2>
+    </header>
+
+    <div class="container">
+
+        <div id="quizInfo" class="quiz-card">
+            <p id="quizMarks"></p>
+
+            <h3>Time Remaining</h3>
+            <p id="timer">Loading timer...</p>
+
+            <p>Loading questions...</p>
+        </div>
+
+        <form id="quizForm" class="quiz-card"></form>
+
+        <div id="result"></div>
+
+        <button class="back-btn" onclick="goToDashboard()">
+            Back to Dashboard
+        </button>
+
+    </div>
+
+    <script>
+        function goToDashboard() {
+            window.location.href = "dashboard.html";
+        }
+    </script>
+
+    <script src="js/quiz.js"></script>
+
+</body>
+</html>

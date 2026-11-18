@@ -1,0 +1,125 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add New Quiz</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f4f8;
+            margin: 0;
+        }
+
+        header {
+            background-color: #243b55;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 600px;
+            margin: 30px auto;
+            background-color: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            background-color: #243b55;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #141e30;
+        }
+
+        #message {
+            margin-top: 15px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>Online Quiz System</h1>
+        <h2>Add New Quiz</h2>
+    </header>
+
+    <div class="container">
+
+        <h2>Quiz Details</h2>
+
+        <form id="addQuizForm">
+
+            <label>Quiz Title</label>
+            <input
+                type="text"
+                id="title"
+                placeholder="Enter quiz title"
+                required
+            >
+
+            <label>Quiz Description</label>
+            <textarea
+                id="description"
+                placeholder="Enter quiz description"
+                required
+            ></textarea>
+
+            <label>Total Marks</label>
+            <input
+                type="number"
+                id="totalMarks"
+                placeholder="Enter total marks"
+                min="1"
+                required
+            >
+
+            <label>Quiz Duration (Minutes)</label>
+            <input
+                type="number"
+                id="duration"
+                placeholder="Enter duration in minutes"
+                min="1"
+                max="180"
+                value="30"
+                required
+            >
+
+            <button type="submit">Save Quiz</button>
+
+        </form>
+
+        <div id="message"></div>
+
+        <button onclick="window.location.href='admin-dashboard.html'">
+            Back to Dashboard
+        </button>
+
+    </div>
+
+    <script src="js/add-quiz.js"></script>
+
+</body>
+</html>
