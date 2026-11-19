@@ -1,7 +1,7 @@
-
 const Database = require("better-sqlite3");
 
-const db = new Database("quiz_system.db");
+const dbPath = process.env.DB_PATH || "quiz_system.db";
+const db = new Database(dbPath);
 
 // Enable foreign keys
 db.pragma("foreign_keys = ON");
