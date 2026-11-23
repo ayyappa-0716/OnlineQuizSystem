@@ -69,20 +69,23 @@ if (!quizColumns.some(column => column.name === "duration_minutes")) {
 console.log("Quizzes table created successfully!");
 
 
-// ===============================
-// QUESTIONS TABLE
-// ===============================
+
+ // ===============================
+ // QUESTIONS TABLE
+ // ===============================
 
 db.prepare(`
     CREATE TABLE IF NOT EXISTS questions (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         quiz_id INTEGER NOT NULL,
-        question TEXT NOT NULL,
+        question TEXT,
+        question_text TEXT,
         option_a TEXT NOT NULL,
         option_b TEXT NOT NULL,
         option_c TEXT NOT NULL,
         option_d TEXT NOT NULL,
         correct_answer TEXT NOT NULL,
+        marks INTEGER DEFAULT 1,
         FOREIGN KEY (quiz_id) REFERENCES quizzes(id)
     )
 `).run();
@@ -94,11 +97,13 @@ const questionColumns = db.prepare(
 
 const requiredColumns = {
     question: "TEXT",
+    question_text: "TEXT",
     option_a: "TEXT",
     option_b: "TEXT",
     option_c: "TEXT",
     option_d: "TEXT",
-    correct_answer: "TEXT"
+    correct_answer: "TEXT",
+    marks: "INTEGER DEFAULT 1"
 };
 
 for (const [column, type] of Object.entries(requiredColumns)) {
@@ -115,6 +120,14 @@ for (const [column, type] of Object.entries(requiredColumns)) {
         console.log(`${column} column added successfully!`);
     }
 }
+
+// Copy old question text into new column where needed
+db.prepare(`
+    UPDATE questions
+    SET question_text = question
+    WHERE question_text IS NULL
+      AND question IS NOT NULL
+`).run();
 
 console.log("Questions table created successfully!");
 

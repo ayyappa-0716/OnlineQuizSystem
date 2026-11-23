@@ -693,24 +693,28 @@ app.post("/admin/add-question", requireAdmin, (req, res) => {
             INSERT INTO questions
             (
                 quiz_id,
+                question,
                 question_text,
                 option_a,
                 option_b,
                 option_c,
                 option_d,
-                correct_answer
+                correct_answer,
+                marks
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         `).run(
             quizId,
+            questionText,
             questionText,
             optionA,
             optionB,
             optionC,
             optionD,
-            correctAnswer
+            correctAnswer,
+            1
         );
-
+        
         res.status(201).json({
             success: true,
             message: "Question added successfully!"
